@@ -1,0 +1,131 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+# check-mk-agent-logwatch
+
+# Call with -d for debug mode: colored output, no saving of status
+
+import sys, os, re, time, psutil, urllib2
+
+
+if '-d' in sys.argv[1:]:
+    tty_red     = '\033[1;31m'
+    tty_green   = '\033[1;32m'
+    tty_yellow  = '\033[1;33m'
+    tty_blue    = '\033[1;34m'
+    tty_normal  = '\033[0m'
+    debug = True
+else:
+    tty_red     = ''
+    tty_green   = ''
+    tty_yellow  = ''
+    tty_blue    = ''
+    tty_normal  = ''
+    debug = False 
+
+status_dir = "."
+config_dir = "." #TODO
+    
+print "<<<zope2>>>"
+
+config_filename = status_dir + "/zope.cfg"
+status_filename = status_dir + "/zope.state"
+
+# structure of config file
+# [instancename]
+# conf = /opt/zope/parts/instance1/etc/zope.conf
+# port = 8081
+# secret = gjhfkukyuyk6
+# ...
+def read_config():
+    # TODO
+    return None
+
+# structure of statusfile
+# # ZOPE.CONF         PORT
+# /opt/zope/parts/instance1/etc/zope.conf|8081
+# /opt/zope/parts/instance2/etc/zope.conf|8082
+def read_status():
+    status = {}
+    for line in file(status_filename):
+        parts = line.split('|')
+        conffile = parts[0]
+        port = parts[1]
+        status[conffile] = int(port)
+    return status
+
+def save_status(status):
+    f = file(status_filename, "w")
+    for conffile, (port,) in status.items():
+        f.write("%s|%d\n" % (conffile, port))
+
+# rt.zps
+def guess_zope_instances():
+    for p in psutil.get_process_list():
+        zconf = [arg for arg in p.cmdline if "zope.conf" in arg]
+        if zconf:
+             if zconf[0][0] == '/':
+                 yield zconf[0]
+             else:
+                 yield "%s/%s" % (p.getcwd(), zconf[0])
+
+# rt.zps
+def load_zopeconf(conffile):
+    currentnode = None
+    portbase = 0
+    for line in file(conffile).readlines():
+        if "<http-server>" in line:
+            currentnode = 'http-server'
+        if currentnode == 'http-server' and line.split() and 'address' == line.split()[0]:
+            port = int(line.split()[-1].split(':')[-1])
+        if "</http-server>" in line:
+            currentnode = None
+        if not currentnode and line.split() and 'port-base' == line.split()[0]:
+            portbase = int(line.split()[-1].split(':')[-1])
+    return dict(
+        port=port+portbase,
+    )
+    
+def zope_monitor(conffile):
+    worst = 1
+    # TODO: assert (status[conffile].port == read_zopeconf(conffile).port)
+    port = load_zopeconf(conffile)['port']
+    # munin.zope plugin
+    outputtxt = ''
+    for plugin in ('zopecache', 'zodbactivity', 
+                   'zopethreads', 'zopememory'):
+        url = 'http://localhost:%d/@@checkmk.zope.plugins/%s' % (port, plugin)
+        # print ">>> %s" % url
+        for line in urllib2.urlopen(url).readlines():
+            if len(line.split(':')) == 2:
+                k, v = line.split(':')
+		# print ">>> %s" % k
+		level = 'I'
+		color = {'C': tty_red, 'W': tty_yellow, 'I': tty_blue, '.': ''}[level]
+		outputtxt += "%s%s %s%s\n" % (color, level, line[:-1], tty_normal)
+    status[conffile] = port,
+    print "[[[%s]]]" % conffile
+    if worst > 0:
+        sys.stdout.write(outputtxt)
+        sys.stdout.flush()
+
+try:
+    config = read_config()
+except Exception, e:
+    print "CANNOT READ CONFIG FILE: %s" % e
+    sys.exit(1)
+
+# Simply ignore errors in the status file.  In case of a corrupted status file we simply begin
+# with an empty status. That keeps the monitoring up and running - even if we might loose a
+# message in the extreme case of a corrupted status file.
+try:
+    status = read_status()
+except Exception, e:
+    status = {}
+
+# The filename line may contain options like 'maxlines=100' or 'maxtime=10'
+for zconf in guess_zope_instances():
+    zope_monitor(zconf)
+
+if not debug:
+    save_status(status)

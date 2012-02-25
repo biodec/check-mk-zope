@@ -1,0 +1,24 @@
+Upstream Author(s):
+
+    Mauro Amico <mauro@biodec.com>
+
+Copyright:
+
+     chekm-mk-agent-zope is a check-mk agent addon for Zope2 monitoring.
+
+     Copyright (c) 2012 BioDec S.r.l. All Rights Reserved.
+
+     To contact BioDec S.r.l.:
+                   * Email: info@biodec.com
+                   * WWW: http://www.biodec.com
+                   * Phone: (+39)-051-0548263
+                   * Fax: (+39)-051-7459582
+
+     BioDec S.r.l. is an Italian company:
+                   * Address: BioDec S.r.l.; via Calzavecchio 20/2; I-40033
+                              Casalecchio di Reno (BO), Italy
+
+License:
+
+    Licensed under the GPL version 2, see `/usr/share/common-licenses/GPL'.
+

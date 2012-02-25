@@ -1,0 +1,5 @@
+check-mk-agent-zope (1.0-1) unstable; urgency=low
+
+ * Initial release
+
+ -- Mauro Amico <mauro@biodec.com>  Sat, 25 Feb 2012 15:56:51 +0100

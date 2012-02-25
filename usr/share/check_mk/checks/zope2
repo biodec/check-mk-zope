@@ -1,0 +1,60 @@
+def zconf(line):
+    return getattr(re.match(r'^\[\[\[(.*)\]\]\]$', line),
+              'group', lambda x: None)(1)
+
+# the inventory function
+def inventory_zope2_factory(measure):
+    def inventory_zope2(info):
+       print "inventory %s" %measure
+       # begin with empty inventory
+       inventory = []
+       # loop over all output lines of the agent
+       conf = None
+       for line in info:
+          if zconf(line[0]):
+              conf = zconf(line[0])
+          elif conf:
+              k, v = line[1].split(':')
+              if k == measure:
+                  inventory.append( (conf, "", None) )
+       return inventory
+    return inventory_zope2
+
+# the check function
+def check_zope2_factory(measure):
+    def check_zope2(item, params, info):
+        conf = None
+        for line in info:
+           if zconf(line[0]):
+               conf = zconf(line[0])
+           elif conf:
+               k, v = line[1].split(':')
+               v = int(float(v))
+               if conf==item and k == measure:
+                 return (0, "OK - %s %d" % (measure, v), [(measure, v),])
+        return (3, "UNKNOWN - %s %s not found in agent output" % (measure, item))
+    return check_zope2
+
+# declare the check to Check_MK
+for measure in [
+          'total_objs',
+          'total_objs_memory',
+          'target_number',
+          'total_load_count',
+          'total_store_count',
+          'total_connections',
+          'total_threads',
+          'free_threads',
+          'VmPeak',
+          'VmSize',
+          'VmLck',
+          'VmHWM',
+          'VmRSS',
+          'VmData',
+          'VmStk',
+          'VmExe',
+          'VmLib',
+          'VmPTE',]:
+    check_info['zope2.%s' % measure] = \
+      (check_zope2_factory(measure), "zope2_%s %%s" % measure, 1, inventory_zope2_factory(measure))
+
