@@ -1,0 +1,24 @@
+### Commented entries have reasonable defaults.
+### Uncomment to edit them.
+Section: net
+Priority: optional
+Homepage: https://github.com/biodec/check-mk-zope
+Standards-Version: 3.6.2
+
+Package: omd-zope
+Version: 1.0-1
+Maintainer: Mauro Amico <mauro@biodec.com>
+# Pre-Depends: <comma-separated list of packages>
+Depends: omd-0.52
+# Recommends: <comma-separated list of packages>
+# Suggests: <comma-separated list of packages>
+# Provides: <comma-separated list of packages>
+# Replaces: <comma-separated list of packages>
+# Architecture: all
+# Copyright: <copyright file; defaults to GPL2>
+# Changelog: <changelog file; defaults to a generic changelog>
+# Readme: <README.Debian file; defaults to a generic one>
+# Extra-Files: <comma-separated list of additional files for the doc directory>
+Files: usr/share/check_mk/checks/zope2 /usr/share/check_mk/checks/zope2
+Description: Zope-Plugin for omd
+ ...
