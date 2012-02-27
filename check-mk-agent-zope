@@ -21,6 +21,5 @@ Depends: check-mk-agent, python-psutil
 # Extra-Files: <comma-separated list of additional files for the doc directory>
 Files: etc/check_mk/zope2.conf /etc/check_mk/zope2.conf
  usr/lib/check_mk_agent/plugins/mk_zope2 /usr/lib/check_mk_agent/plugins/mk_zope2
- usr/share/check_mk/checks/zope2 /usr/share/check_mk/checks/zope2
 Description: Zope-Plugin for check_mk agent
  ...

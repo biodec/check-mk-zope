@@ -96,13 +96,15 @@ def zope_monitor(conffile):
                    'zopethreads', 'zopememory'):
         url = 'http://localhost:%d/@@checkmk.zope.plugins/%s' % (port, plugin)
         # print ">>> %s" % url
+        pluginout = []
         for line in urllib2.urlopen(url).readlines():
             if len(line.split(':')) == 2:
-                k, v = line.split(':')
-		# print ">>> %s" % k
-		level = 'I'
-		color = {'C': tty_red, 'W': tty_yellow, 'I': tty_blue, '.': ''}[level]
-		outputtxt += "%s%s %s%s\n" % (color, level, line[:-1], tty_normal)
+                k, v = line.split(':')            
+                # print ">>> %s" % k
+                pluginout.append(line.strip())
+        level = 'I'
+        color = {'C': tty_red, 'W': tty_yellow, 'I': tty_blue, '.': ''}[level]
+        outputtxt += "%s%s %s=%s%s\n" % (color, level, plugin, ','.join(pluginout), tty_normal)
     status[conffile] = port,
     print "[[[%s]]]" % conffile
     if worst > 0:

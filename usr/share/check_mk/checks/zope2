@@ -3,9 +3,9 @@ def zconf(line):
               'group', lambda x: None)(1)
 
 # the inventory function
-def inventory_zope2_factory(measure):
+def inventory_zope2_factory(plugin):
     def inventory_zope2(info):
-       print "inventory %s" %measure
+       print "inventory %s" % plugin
        # begin with empty inventory
        inventory = []
        # loop over all output lines of the agent
@@ -14,47 +14,33 @@ def inventory_zope2_factory(measure):
           if zconf(line[0]):
               conf = zconf(line[0])
           elif conf:
-              k, v = line[1].split(':')
-              if k == measure:
+              if line[1].split('=')[0] == plugin:
                   inventory.append( (conf, "", None) )
        return inventory
     return inventory_zope2
 
 # the check function
-def check_zope2_factory(measure):
+def check_zope2_factory(plugin):
     def check_zope2(item, params, info):
         conf = None
         for line in info:
            if zconf(line[0]):
                conf = zconf(line[0])
            elif conf:
-               k, v = line[1].split(':')
-               v = int(float(v))
-               if conf==item and k == measure:
-                 return (0, "OK - %s %d" % (measure, v), [(measure, v),])
-        return (3, "UNKNOWN - %s %s not found in agent output" % (measure, item))
+               k, values = line[1].split('=')
+               results = [row.split(':') for row in values.split(',')]
+               # v = int(float(v))
+               if conf==item and k == plugin:
+                   return (0, "OK - %s" % values, results)
+        return (3, "UNKNOWN - %s %s not found in agent output" % (plugin, item))
     return check_zope2
 
 # declare the check to Check_MK
-for measure in [
-          'total_objs',
-          'total_objs_memory',
-          'target_number',
-          'total_load_count',
-          'total_store_count',
-          'total_connections',
-          'total_threads',
-          'free_threads',
-          'VmPeak',
-          'VmSize',
-          'VmLck',
-          'VmHWM',
-          'VmRSS',
-          'VmData',
-          'VmStk',
-          'VmExe',
-          'VmLib',
-          'VmPTE',]:
-    check_info['zope2.%s' % measure] = \
-      (check_zope2_factory(measure), "zope2_%s %%s" % measure, 1, inventory_zope2_factory(measure))
+for plugin in [
+          'zopecache',
+          'zodbactivity',
+          'zopethreads',
+          'zopememory',]:
+    check_info['zope2.%s' % plugin] = \
+      (check_zope2_factory(plugin), "zope2_%s %%s" % plugin, 1, inventory_zope2_factory(plugin))
 

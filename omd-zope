@@ -19,6 +19,9 @@ Depends: omd-0.52
 # Changelog: <changelog file; defaults to a generic changelog>
 # Readme: <README.Debian file; defaults to a generic one>
 # Extra-Files: <comma-separated list of additional files for the doc directory>
-Files: usr/share/check_mk/checks/zope2 /usr/share/check_mk/checks/zope2
+Files: usr/share/check_mk/checks/zope2 /omd/versions/0.52/share/check_mk/checks/zope2
+   usr/share/check_mk/pnp-templates/check_mk-zope2.zopethreads.php /omd/versions/0.52/share/check_mk/pnp-templates/check_mk-zope2.zopethreads.php
+   usr/share/check_mk/pnp-templates/check_mk-zope2.zodbactivity.php /omd/versions/0.52/share/check_mk/pnp-templates/check_mk-zope2.zodbactivity.php
+   usr/share/check_mk/pnp-templates/check_mk-zope2.zopecache.php /omd/versions/0.52/share/check_mk/pnp-templates/check_mk-zope2.zopecache.php
 Description: Zope-Plugin for omd
  ...
