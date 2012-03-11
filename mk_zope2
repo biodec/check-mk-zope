@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 
+#
+
 # check-mk-agent-logwatch
 
 # Call with -d for debug mode: colored output, no saving of status
 
 import sys, os, re, time, psutil, urllib2
-
 
 if '-d' in sys.argv[1:]:
     tty_red     = '\033[1;31m'
@@ -61,50 +62,68 @@ def save_status(status):
 
 # rt.zps
 def guess_zope_instances():
+    instances = set()
     for p in psutil.get_process_list():
         zconf = [arg for arg in p.cmdline if "zope.conf" in arg]
         if zconf:
              if zconf[0][0] == '/':
-                 yield zconf[0]
+                 instances.add(zconf[0])
              else:
-                 yield "%s/%s" % (p.getcwd(), zconf[0])
+                 instances.add("%s/%s" % (p.getcwd(), zconf[0]))
+    return instances
 
 # rt.zps
 def load_zopeconf(conffile):
     currentnode = None
+    muninsecret = None
     portbase = 0
     for line in file(conffile).readlines():
         if "<http-server>" in line:
             currentnode = 'http-server'
         if currentnode == 'http-server' and line.split() and 'address' == line.split()[0]:
             port = int(line.split()[-1].split(':')[-1])
+        if "<product-config munin.zope>" in line:
+            currentnode = 'munin.zope'
+        if currentnode == 'munin.zope' and line.split() and 'secret' == line.split()[0]:
+            muninsecret = line.split()[-1].strip()
         if "</http-server>" in line:
+            currentnode = None
+        if "</product-config>" in line:
             currentnode = None
         if not currentnode and line.split() and 'port-base' == line.split()[0]:
             portbase = int(line.split()[-1].split(':')[-1])
     return dict(
         port=port+portbase,
+        muninsecret=muninsecret,
     )
     
 def zope_monitor(conffile):
     worst = 1
     # TODO: assert (status[conffile].port == read_zopeconf(conffile).port)
-    port = load_zopeconf(conffile)['port']
+    config = load_zopeconf(conffile)
+    port = config['port']
+    muninsecret = config['muninsecret']
     # munin.zope plugin
     outputtxt = ''
     for plugin in ('zopecache', 'zodbactivity', 
                    'zopethreads', 'zopememory'):
-        url = 'http://localhost:%d/@@checkmk.zope.plugins/%s' % (port, plugin)
+        url = 'http://localhost:%d/@@munin.zope.plugins/%s' % (port, plugin)
+        if muninsecret:
+            url = "%s?%s" % (url, muninsecret)
         # print ">>> %s" % url
         pluginout = []
-        for line in urllib2.urlopen(url).readlines():
-            if len(line.split(':')) == 2:
-                k, v = line.split(':')            
-                # print ">>> %s" % k
-                pluginout.append(line.strip())
-        level = 'I'
-        color = {'C': tty_red, 'W': tty_yellow, 'I': tty_blue, '.': ''}[level]
-        outputtxt += "%s%s %s=%s%s\n" % (color, level, plugin, ','.join(pluginout), tty_normal)
+        try:
+            for line in urllib2.urlopen(url).readlines():
+                if len(line.split(':')) == 2:
+                    k, v = line.split(':')            
+                    # print ">>> %s" % k
+                    pluginout.append(line.strip())
+            level = 'I'
+            color = {'C': tty_red, 'W': tty_yellow, 'I': tty_blue, '.': ''}[level]
+            outputtxt += "%s%s %s=%s%s\n" % (color, level, plugin, ','.join(pluginout), tty_normal)
+        except:
+            color = tty_yellow
+            outputtxt += "%s%s %s=%s%s\n" % (color, level, plugin, 'missing or invalid plugin', tty_normal)
     status[conffile] = port,
     print "[[[%s]]]" % conffile
     if worst > 0:
@@ -125,7 +144,6 @@ try:
 except Exception, e:
     status = {}
 
-# The filename line may contain options like 'maxlines=100' or 'maxtime=10'
 for zconf in guess_zope_instances():
     zope_monitor(zconf)
 
