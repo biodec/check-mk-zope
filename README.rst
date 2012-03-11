@@ -29,3 +29,4 @@ TODO
 * perfometer: http://mathias-kettner.de/checkmk_devel_perfometer.html
 * counter: http://mathias-kettner.de/checkmk_devel_counters.html
 * release package(s) on http://exchange.check-mk.org/
+* zopememory ...

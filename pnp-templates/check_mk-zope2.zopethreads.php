@@ -8,7 +8,7 @@ $opt[1] = "--title \"Threads For $hostname / $instance\" ";
 
 $def[1] =  
     "DEF:total=$RRDFILE[1]:$DS[1]:MAX ".
-    "AREA:total#202020:\"Total \" ".
+    "LINE:total#202020:\"Total \" ".
     "GPRINT:total:LAST:\"%3lg LAST \" ".
     "GPRINT:total:AVERAGE:\"%3lg AVERAGE \" ".
     "GPRINT:total:MAX:\"%3lg MAX\\n\" ".
@@ -19,7 +19,7 @@ $def[1] .=
     "AREA:free#4080c0:\"Free \" ".
     "GPRINT:free:LAST:\"%2lg LAST \" ".
     "GPRINT:free:AVERAGE:\"%2lg AVERAGE \" ".
-    "GPRINT:free:MAX:\"%2lg MAX \" ".
+    "GPRINT:free:MAX:\"%2lg MAX\\n\" ".
     "";
 
 ?>
