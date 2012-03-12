@@ -11,7 +11,7 @@ Zope buildout::
   [instance]
   eggs =
        ...
-       munin.zope >= 1.3
+       munin.zope >= 1.3dev0
 
   zcml =
        ...
