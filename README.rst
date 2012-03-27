@@ -3,15 +3,10 @@ QUICK START
 
 Zope buildout::
 
-  [buildout]
-  find-links =
-      ...
-      https://github.com/biodec/check-mk-zope/downloads
-
   [instance]
   eggs =
        ...
-       munin.zope >= 1.3dev0
+       munin.zope >= 1.3.1
 
   zcml =
        ...
