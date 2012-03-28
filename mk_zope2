@@ -104,6 +104,12 @@ def zope_monitor(conffile):
     port = config['port']
     muninsecret = config['muninsecret']
     # munin.zope plugin
+    ## Timeout, min limit 0.006s. Max limit 1s.
+    ## If timeout is set to 0.005s it may fails every 5-10 times.
+    ## If timeout is set lower thane 0.005s it may fails quite often.
+    ## If timeout is set bigger then 1s it may generate spwaning of mk_zope2  processess
+    ## 0.1 s it seems reasonable. YMMV!.
+    timeout = 0.1
     outputtxt = ''
     for plugin in ('zopecache', 'zodbactivity', 
                    'zopethreads', 'zopememory'):
@@ -113,7 +119,8 @@ def zope_monitor(conffile):
         # print ">>> %s" % url
         pluginout = []
         try:
-            for line in urllib2.urlopen(url).readlines():
+            ## timeout act as this level
+            for line in urllib2.urlopen(url, None, timeout).readlines():
                 if len(line.split(':')) == 2:
                     k, v = line.split(':')            
                     # print ">>> %s" % k
@@ -122,8 +129,11 @@ def zope_monitor(conffile):
             color = {'C': tty_red, 'W': tty_yellow, 'I': tty_blue, '.': ''}[level]
             outputtxt += "%s%s %s=%s%s\n" % (color, level, plugin, ','.join(pluginout), tty_normal)
         except:
+            ## TODO: set the right level
+            level = '.'
             color = tty_yellow
-            outputtxt += "%s%s %s=%s%s\n" % (color, level, plugin, 'missing or invalid plugin', tty_normal)
+            ## TODO: set the right "missing_or_invalid_plugin" string for the correct server side parsing. 
+            outputtxt += "%s%s %s=%s%s\n" % (color, level, plugin, 'missing_or_invalid_plugin:', tty_normal)
     status[conffile] = port,
     print "[[[%s]]]" % conffile
     if worst > 0:
