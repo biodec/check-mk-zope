@@ -6,7 +6,7 @@ Homepage: https://github.com/biodec/check-mk-agent-zope
 Standards-Version: 3.6.2
 
 Package: check-mk-agent-zope
-Version: 1.0-9
+Version: 1.1-0
 Maintainer: Mauro Amico <mauro@biodec.com>
 # Pre-Depends: <comma-separated list of packages>
 Depends: check-mk-agent, python-psutil
@@ -19,7 +19,7 @@ Depends: check-mk-agent, python-psutil
 # Changelog: <changelog file; defaults to a generic changelog>
 # Readme: <README.Debian file; defaults to a generic one>
 # Extra-Files: <comma-separated list of additional files for the doc directory>
-Files: zope2.conf /etc/check_mk/
-       mk_zope2 /usr/lib/check_mk_agent/plugins/
+Files: zope2.conf /etc/check_mk/zope2.conf
+       mk_zope2 /usr/lib/check_mk_agent/plugins/mk_zope2
 Description: Zope-Plugin for check_mk agent
  ...

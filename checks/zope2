@@ -1,11 +1,65 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+# +------------------------------------------------------------------+
+# |             ____ _               _        __  __ _  __           |
+# |            / ___| |__   ___  ___| | __   |  \/  | |/ /           |
+# |           | |   | '_ \ / _ \/ __| |/ /   | |\/| | ' /            |
+# |           | |___| | | |  __/ (__|   <    | |  | | . \            |
+# |            \____|_| |_|\___|\___|_|\_\___|_|  |_|_|\_\           |
+# |                                                                  |
+# | Copyright Biodec 2010                            info@biodec.com |
+# +------------------------------------------------------------------+
+#
+
+# Example of plugin output
+#I zopeinstance=status:OK
+#I zopecache=total_objs:116799.0,total_objs_memory:628.0,target_number:20000.0
+#I zodbactivity=total_load_count:0.0,total_store_count:0.0,total_connections:67.0
+#I zopethreads=total_threads:3.0,free_threads:0.0
+#I zopememory=VmPeak:447668224,VmSize:447668224,VmLck:0,VmHWM:160661504,VmRSS:160661504,VmData:170082304,VmStk:393216,VmExe:2215936,VmLib:9814016,VmPTE:663552
+
+## USE factory_settings (since 1.1.11i2)
+## For each numeric check, define 4 levels:
+##  - below the first, is CRITICAL
+##  - below the second, is WARNING
+##  - above the third, is WARNING
+##  - above the fourth, is CRITICAL
+factory_settings["zope2zopeinstance_default_levels"] = {}
+ 
+factory_settings["zope2zopecache_default_levels"] = { 'total_objs'        : (None, None, None, None),
+                                                      'total_objs_memory' : (None, None, None, None),
+                                                      'target_numer'      : (None, None, None, None),
+                                                     }
+
+factory_settings["zope2zodbactivity_default_levels"] = { 'total_load_count'  : (None, None, None, None),
+                                                         'total_store_count' : (None, None, None, None),
+                                                         'total_connections' : (None, None, None, None),
+                                                     } 
+
+factory_settings["zope2zopethreads_default_levels"] = {'total_threads'     : (None,    0,    5, None),
+                                                       'free_threads'      : (None, None, None, None),
+                              }
+
+factory_settings["zope2zopememory_default_levels"] = { 'VmPeak'            : (None, None, None, None),
+                                                       'VmSize'            : (None, None, None, None),
+                                                       'VmLck'             : (None, None, None, None),
+                                                       'VmHWM'             : (None, None, None, None),
+                                                       'VmRSS'             : (None, None, None, None),
+                                                       'VmData'            : (None, None, None, None),
+                                                       'VmStk'             : (None, None, None, None),
+                                                       'VmExe'             : (None, None, None, None),
+                                                       'VmLib'             : (None, None, None, None),
+                                                       'VmPTE'             : (None, None, None, None),
+                                                      }
+
 def zconf(line):
     return getattr(re.match(r'^\[\[\[(.*)\]\]\]$', line),
               'group', lambda x: None)(1)
+    #return '-'.join([x for x in zconf.split('/') if x not in ('opt','var','srv','etc','parts','zope.conf')])
 
-# the inventory function
+# the inventory function, checks the agent output and create a list of items
 def inventory_zope2_factory(plugin):
     def inventory_zope2(info):
-       print "inventory %s" % plugin
        # begin with empty inventory
        inventory = []
        # loop over all output lines of the agent
@@ -15,11 +69,11 @@ def inventory_zope2_factory(plugin):
               conf = zconf(line[0])
           elif conf:
               if line[1].split('=')[0] == plugin:
-                  inventory.append( (conf, "", None) )
+                  inventory.append( (conf, "", "zope2%s_default_levels" % plugin ) )
        return inventory
     return inventory_zope2
 
-# the check function
+# the check function, process the output
 def check_zope2_factory(plugin):
     def check_zope2(item, params, info):
         conf = None
@@ -31,16 +85,41 @@ def check_zope2_factory(plugin):
                results = [row.split(':') for row in values.split(',')]
                # v = int(float(v))
                if conf==item and k == plugin:
+	           ## If plugin is zopeinstane returns direct agent results
+		   if plugin == 'zopeinstance':
+			res, val = results[0]
+			if val == 'OK':
+				return (0, "OK - %s" % values, results)
+			else:
+				return (2, "CRIT - %s" % values, results)
+                   ## For other plugins, with multiple results returns the worst
+                   for res, val in results:
+                        if type(params) == dict:
+                           # check below the first (CRIT)
+                           if params.has_key(res) and params[res][0] and float(val) <= params[res][0]:
+                                return (2, "CRIT - %s" % values, results)
+                           # check above the fourth (CRIT)
+                           elif params.has_key(res) and params[res][3] and float(val) >= params[res][3]:
+                                return (2, "CRIT - %s" % values, results)
+                           # check below the second (WARN)
+                           elif params.has_key(res) and params[res][1] and float(val) <= params[res][1]:
+                                return (1, "WARN - %s" % values, results)
+                           # check above the third (WARN)
+                           elif params.has_key(res) and params[res][2] and float(val) >= params[res][2]:
+                                return (1, "WARN - %s" % values, results)
+                           # otherwise is in range (OK)
                    return (0, "OK - %s" % values, results)
         return (3, "UNKNOWN - %s %s not found in agent output" % (plugin, item))
     return check_zope2
 
 # declare the check to Check_MK
 for plugin in [
-          'zopecache',
-          'zodbactivity',
-          'zopethreads',
-          'zopememory',]:
+              'zopeinstance',
+              'zopecache',
+              'zodbactivity',
+              'zopethreads',
+              'zopememory',]:
     check_info['zope2.%s' % plugin] = \
-      (check_zope2_factory(plugin), "zope2_%s %%s" % plugin, 1, inventory_zope2_factory(plugin))
-
+            (check_zope2_factory(plugin), "zope2_%s %%s" % plugin, 1, inventory_zope2_factory(plugin))
+    ## Use next to check against main.mk parameter settings
+    check_default_levels['zope2.%s' % plugin] = "zope2%s_default_levels" % plugin

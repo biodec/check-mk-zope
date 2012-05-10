@@ -6,10 +6,10 @@ Homepage: https://github.com/biodec/check-mk-zope
 Standards-Version: 3.6.2
 
 Package: omd-zope
-Version: 1.0-5
+Version: 1.1-0
 Maintainer: Mauro Amico <mauro@biodec.com>
 # Pre-Depends: <comma-separated list of packages>
-Depends: omd-0.52
+Depends: omd-0.52 | omd-0.54
 # Recommends: <comma-separated list of packages>
 # Suggests: <comma-separated list of packages>
 # Provides: <comma-separated list of packages>
@@ -19,10 +19,11 @@ Depends: omd-0.52
 # Changelog: <changelog file; defaults to a generic changelog>
 # Readme: <README.Debian file; defaults to a generic one>
 # Extra-Files: <comma-separated list of additional files for the doc directory>
-Files: checks/zope2 /omd/versions/0.52/share/check_mk/
-       pnp-templates/check_mk-zope2.zodbactivity.php /omd/versions/0.52/share/check_mk/
-       pnp-templates/check_mk-zope2.zopecache.php /omd/versions/0.52/share/check_mk/
-       pnp-templates/check_mk-zope2.zopememory.php /omd/versions/0.52/share/check_mk/
-       pnp-templates/check_mk-zope2.zopethreads.php /omd/versions/0.52/share/check_mk/
+Files: checks/zope2 /omd/versions/default/share/check_mk/checks/zope2
+       pnp-templates/check_mk-zope2.zodbactivity.php /omd/versions/default/share/check_mk/pnp-templates/check_mk-zope2.zodbactivity.php
+       pnp-templates/check_mk-zope2.zopecache.php /omd/versions/default/share/check_mk/pnp-templates/check_mk-zope2.zopecache.php
+       pnp-templates/check_mk-zope2.zopememory.php /omd/versions/default/share/check_mk/pnp-templates/check_mk-zope2.zopememory.php
+       pnp-templates/check_mk-zope2.zopethreads.php /omd/versions/default/share/check_mk/pnp-templates/check_mk-zope2.zopethreads.php
+Conflicts: omd (> 0.54)
 Description: Zope-Plugin for omd
  ...

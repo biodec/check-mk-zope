@@ -3,3 +3,25 @@ check-mk-agent-zope (1.0-1) unstable; urgency=low
  * Initial release
 
  -- Mauro Amico <mauro@biodec.com>  Sat, 25 Feb 2012 15:56:51 +0100
+check-mk-agent-zope (1.0-8) unstable; urgency=low
+
+ * Production Release
+
+ -- Mauro Amico <mauro@biodec.com>  Sun, 26 Feb 2012 15:56:51 +0100
+check-mk-agent-zope (1.0-9) unstable; urgency=low
+
+ * First stable (correct some bugs, especially timeout on response)
+
+ -- Andrea Zauli <andrea@biodec.com>  Sat, 24 Mar 2012 15:00:00 +0100
+check-mk-agent-zope (1.1-0) unstable; urgency=low
+
+ * Add zopeinstance check
+ * Change instanze identifier (eliminate opt,parts,etc,zope.conf)
+
+ -- Andrea Zauli <andrea@biodec.com>  Thu, 10 May 2012 15:18:55 +0100
+omd-zope (1.1-0) unstable; urgency=low
+
+ * Add zopeinstance check
+ * Add default values
+
+ -- Andrea Zauli <andrea@biodec.com>  Thu, 10 May 2012 15:18:55 +0100

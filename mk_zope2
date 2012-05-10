@@ -57,8 +57,13 @@ def read_status():
 
 def save_status(status):
     f = file(status_filename, "w")
-    for conffile, (port,) in status.items():
-        f.write("%s|%d\n" % (conffile, port))
+    ## if we want the possibility to have the instance status:Down
+    ## we could keep the instance previous conf, and so writing
+    ## the new status file only if staus.items() is not empty.
+    ## This will permit to have the status:Down of the instance.
+    #  if status.items():
+    for conffile, port in status.items():
+            f.write("%s|%d\n" % (conffile, port))
 
 # rt.zps
 def guess_zope_instances():
@@ -111,6 +116,19 @@ def zope_monitor(conffile):
     ## 0.1 s it seems reasonable. YMMV!.
     timeout = 0.1
     outputtxt = ''
+    ## Check Instance
+    plugin = 'zopeinstance'
+    url = 'http://localhost:%d/' % (port,)
+    try:
+    	urllib2.urlopen(url, None, timeout).readlines()
+        level = 'I'
+	pluginout = 'status:OK'
+    except:
+	level = 'C'
+	pluginout = 'status:CRIT'
+    color = {'C': tty_red, 'W': tty_yellow, 'I': tty_blue, '.': ''}[level]
+    outputtxt = "%s%s %s=%s%s\n" % (color, level, plugin, pluginout, tty_normal)
+    ## Check munin.zope  
     for plugin in ('zopecache', 'zodbactivity', 
                    'zopethreads', 'zopememory'):
         url = 'http://localhost:%d/@@munin.zope.plugins/%s' % (port, plugin)
@@ -134,8 +152,8 @@ def zope_monitor(conffile):
             color = tty_yellow
             ## TODO: set the right "missing_or_invalid_plugin" string for the correct server side parsing. 
             outputtxt += "%s%s %s=%s%s\n" % (color, level, plugin, 'missing_or_invalid_plugin:', tty_normal)
-    status[conffile] = port,
-    print "[[[%s]]]" % conffile
+    status[conffile] = port
+    print "[[[%s]]]" % '-'.join([x for x in conffile.split('/') if x not in ('opt','var','srv','etc','parts','zope.conf','')])
     if worst > 0:
         sys.stdout.write(outputtxt)
         sys.stdout.flush()
