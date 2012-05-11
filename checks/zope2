@@ -36,7 +36,7 @@ factory_settings["zope2zodbactivity_default_levels"] = { 'total_load_count'  : (
                                                          'total_connections' : (None, None, None, None),
                                                      } 
 
-factory_settings["zope2zopethreads_default_levels"] = {'total_threads'     : (None,    0,    5, None),
+factory_settings["zope2zopethreads_default_levels"] = {'total_threads'     : (None,    0,    6, None),
                                                        'free_threads'      : (None, None, None, None),
                               }
 
