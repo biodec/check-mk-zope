@@ -114,7 +114,7 @@ def zope_monitor(conffile):
     ## If timeout is set lower thane 0.005s it may fails quite often.
     ## If timeout is set bigger then 1s it may generate spwaning of mk_zope2  processess
     ## 0.1 s it seems reasonable. YMMV!.
-    timeout = 0.1
+    timeout = 0.3
     outputtxt = ''
     ## Check Instance
     plugin = 'zopeinstance'
