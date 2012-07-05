@@ -6,7 +6,7 @@ Homepage: https://github.com/biodec/check-mk-agent-zope
 Standards-Version: 3.6.2
 
 Package: check-mk-agent-zope
-Version: 1.1-0
+Version: 1.1-2
 Maintainer: Mauro Amico <mauro@biodec.com>
 # Pre-Depends: <comma-separated list of packages>
 Depends: check-mk-agent, python-psutil

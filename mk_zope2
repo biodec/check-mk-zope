@@ -8,6 +8,8 @@
 # Call with -d for debug mode: colored output, no saving of status
 
 import sys, os, re, time, psutil, urllib2
+if sys.version_info < (2,6):
+    import socket
 
 if '-d' in sys.argv[1:]:
     tty_red     = '\033[1;31m'
@@ -122,12 +124,16 @@ def zope_monitor(conffile):
     plugin = 'zopeinstance'
     url = 'http://localhost:%d/' % (port,)
     try:
-    	urllib2.urlopen(url, None, timeout).readlines()
+        if sys.version_info > (2,6):
+            urllib2.urlopen(url, None, timeout).readlines()
+        else:
+            socket.setdefaulttimeout(timeout)
+            urllib2.urlopen(url, None ).readlines()
         level = 'I'
-	pluginout = 'status:OK'
+        pluginout = 'status:OK'
     except:
-	level = 'C'
-	pluginout = 'status:CRIT'
+        level = 'C'
+        pluginout = 'status:CRIT'
     color = {'C': tty_red, 'W': tty_yellow, 'I': tty_blue, '.': ''}[level]
     outputtxt = "%s%s %s=%s%s\n" % (color, level, plugin, pluginout, tty_normal)
     ## Check munin.zope  

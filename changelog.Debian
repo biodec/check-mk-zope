@@ -25,3 +25,13 @@ omd-zope (1.1-0) unstable; urgency=low
  * Add default values
 
  -- Andrea Zauli <andrea@biodec.com>  Thu, 10 May 2012 15:18:55 +0100
+check-mk-agent-zope (1.1-1) unstable; urgency=low
+
+ * Correct compatibility with urllib2 of python < 2.6 (no timeout parameters)
+
+ -- Andrea Zauli <andrea@biodec.com>  Thu, 24 May 2012 10:30:55 +0100
+check-mk-agent-zope (1.1-2) unstable; urgency=low
+
+ * Correct a bug in the function used to discover instances
+
+ -- Andrea Zauli <andrea@biodec.com>  Thu, 5 Jul 2012 14:50:55 +0100
