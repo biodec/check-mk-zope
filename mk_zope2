@@ -146,7 +146,12 @@ def zope_monitor(conffile):
         pluginout = []
         try:
             ## timeout act as this level
-            for line in urllib2.urlopen(url, None, timeout).readlines():
+            if sys.version_info > (2,6):
+                lines = urllib2.urlopen(url, None, timeout).readlines()
+            else:
+                socket.setdefaulttimeout(timeout)
+                lines = urllib2.urlopen(url, None ).readlines()
+            for line in lines:
                 if len(line.split(':')) == 2:
                     k, v = line.split(':')            
                     # print ">>> %s" % k
