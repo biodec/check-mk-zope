@@ -71,10 +71,12 @@ def guess_zope_instances():
     for p in psutil.get_process_list():
         zconf = [arg for arg in p.cmdline if "zope.conf" in arg]
         if zconf:
-             if zconf[0][0] == '/':
-                 instances.add(zconf[0])
-             else:
-                 instances.add("%s/%s" % (p.getcwd(), zconf[0]))
+            if zconf[0][0] == '/':
+                zconf = zconf[0]
+            else:
+                zconf = "%s/%s" % (p.getcwd(), zconf[0])
+            if os.path.exists(zconf):
+                instances.add(zconf)
     return instances
 
 # rt.zps
